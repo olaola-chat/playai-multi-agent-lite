@@ -1,0 +1,5 @@
+core/__pycache__
+core/api/__pycache__
+core/config/__pycache__
+core/prompt/__pycache__
+.env

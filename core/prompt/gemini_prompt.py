@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from google.genai.types import Content, Part
+import json
 
 class GeminiPrompt(BaseModel):
     prompt: str
@@ -14,7 +15,7 @@ class ChatHistory(BaseModel):
         Convert the chat history to a simple format with role and content keys.
         
         Returns:
-            list: A list of dictionaries with 'role' and 'content' keys.
+            str: A JSON string representation of the chat history.
         """
         simple_format = []
         for content in self.chat_history:
@@ -24,7 +25,8 @@ class ChatHistory(BaseModel):
                 "role": content.role,
                 "content": text
             })
-        return simple_format
+        # Convert the list to a JSON string
+        return json.dumps(simple_format)
     
     @classmethod
     def from_simple_format(cls, simple_format):
@@ -32,11 +34,15 @@ class ChatHistory(BaseModel):
         Create a ChatHistory object from a simple format with role and content keys.
         
         Args:
-            simple_format (list): A list of dictionaries with 'role' and 'content' keys.
+            simple_format (str): A JSON string representation of the chat history.
             
         Returns:
             ChatHistory: A ChatHistory object with the converted chat history.
         """
+        # Parse the JSON string back to a list
+        if isinstance(simple_format, str):
+            simple_format = json.loads(simple_format)
+            
         chat_history = []
         for message in simple_format:
             chat_history.append(

@@ -6,3 +6,4 @@ core/prompt/__pycache__
 core/llmapi/__pycache__
 __pycache__
 *.log
+chat_history.json

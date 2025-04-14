@@ -1,87 +1,47 @@
-from core.config.gemini_model_config import ModelName
-from core.api.gemini_api import generate_text_with_stream, generate_text
-from core.prompt.gemini_prompt import GeminiPrompt, ChatHistory
-from core.config.gemini_model_config import GeminiModelConfig
-from google.genai.types import Content,Part
-from core.orchestra import AgentOrchestra
+import uvicorn
+import argparse
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from core.routers.approuter import router
 
-def init_chat_history():
-    return ChatHistory(
-        chat_history=[
-            Content(
-                role="user",
-                parts=[
-                    Part.from_text(text="hihi")
-                ]
-            ),
-            Content(
-                role="model",
-                parts=[
-                    Part.from_text(text="你好呀")
-                ]
-            ),
+# Create FastAPI app instance
+app = FastAPI(
+    title="Player Multi-Agent API",
+    description="API for the Player Multi-Agent system",
+    version="0.1.0"
+)
 
-        ]
-    )
+# # Configure CORS
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["*"],  # In production, replace with specific origins
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
 
-    
-if __name__ == "__main__":
+# Include routers
+app.include_router(router)
 
-    agent_orchestra = AgentOrchestra()
-    chat_history = init_chat_history()
-    model_configs = {
-        "router_agent": GeminiModelConfig(
-            model=ModelName.GEMINI_2_0_FLASH,
-            temperature=0.5,
-            top_p=1,
-            max_tokens=256
-        ),
-        "agent_1": GeminiModelConfig(
-            model=ModelName.GEMINI_2_0_FLASH_LITE,
-            temperature=1,
-            top_p=0.5,
-            max_tokens=512
-        ),
-        "agent_2": GeminiModelConfig(
-            model=ModelName.GEMINI_2_0_FLASH_LITE,
-            temperature=1,
-            top_p=0.7,
-            max_tokens=512
-        ),
-        "agent_3": GeminiModelConfig(
-            model=ModelName.GEMINI_2_0_FLASH_LITE,
-            temperature=1,
-            top_p=0.6,
-            max_tokens=512
-        ),
-        "agent_4": GeminiModelConfig(
-            model=ModelName.GEMINI_2_0_FLASH_LITE,
-            temperature=1,
-            top_p=0.5,
-            max_tokens=512
-        )
+# Root endpoint
+@app.get("/")
+async def root():
+    """
+    Root endpoint that returns basic API information
+    """
+    return {
+        "message": "Welcome to the Player Multi-Agent API",
+        "version": "0.1.0",
+        "status": "operational"
     }
 
-    test_cases_prompt = [
-        "你好丑啊",
-        "你真漂亮",
-        "我心情不好",
-        "你是傻傻的",
-        "你喜欢吃什么",
-        "我好累啊",
-        "你真别扭",
-        "不想上班",
-        "你工资多少",
-        "你真搞笑",
-        "你真无聊",
-        "说个笑话我听"
-    ]
-
-    for prompt in test_cases_prompt:
-
-        print("--------------------------------")
-        print("用户问:", prompt)
-        print(agent_orchestra.multi_agent_response(chat_history, prompt, model_configs))
-
-    print("--------------------------------")
-
+# Health check endpoint
+@app.get("/health")
+async def health_check():
+    """
+    Health check endpoint to verify API status
+    """
+    return {
+        "status": "healthy",
+        "service": "multi-agent-api"
+    } 

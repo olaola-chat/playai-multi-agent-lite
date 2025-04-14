@@ -33,10 +33,10 @@ class MultiAgentRequest(BaseModel):
     """Model for multi-agent request"""
     chat_history: str 
     # format [{"role": "user", "content": "user_message"},
-    #        {"role": "assistant", "content": "assistant_message"}]
+    #        {"role": "AI character name", "content": "AI_message"}]
 
     current_question: str
-    # model_configs: Dict[str, Any]
+    
 
 
 @router.post("/multi-agent")

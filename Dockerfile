@@ -36,5 +36,5 @@ ENV PYTHONUNBUFFERED=1
 EXPOSE 18090
 
 # Command to run the application using Gunicorn with Uvicorn workers
-CMD ["gunicorn", "main:app", "--bind", "0.0.0.0:18090", "--timeout", "300", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker"]
+CMD ["gunicorn", "main:app", "--bind", "0.0.0.0:18090", "--timeout", "120", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker"]
 

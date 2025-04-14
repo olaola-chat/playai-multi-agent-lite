@@ -4,3 +4,5 @@ core/config/__pycache__
 core/prompt/__pycache__
 .env
 core/llmapi/__pycache__
+__pycache__
+*.log

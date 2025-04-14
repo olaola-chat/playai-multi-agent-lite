@@ -3,3 +3,4 @@ core/api/__pycache__
 core/config/__pycache__
 core/prompt/__pycache__
 .env
+core/llmapi/__pycache__

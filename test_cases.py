@@ -1,6 +1,5 @@
 from core.config.gemini_model_config import ModelName
-from core.api.gemini_api import generate_text_with_stream, generate_text
-from core.prompt.gemini_prompt import GeminiPrompt, ChatHistory
+from core.prompt.gemini_prompt import ChatHistory
 from core.config.gemini_model_config import GeminiModelConfig
 from google.genai.types import Content,Part
 from core.orchestra import AgentOrchestra
@@ -81,7 +80,7 @@ if __name__ == "__main__":
 
         print("--------------------------------")
         print("用户问:", prompt)
-        print(agent_orchestra.multi_agent_response(chat_history, prompt, model_configs))
+        print(agent_orchestra.multi_agent_response(chat_history.to_simple_format(), prompt, model_configs))
 
     print("--------------------------------")
 

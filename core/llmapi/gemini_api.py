@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 import os
 import logging
 from core.prompt.gemini_prompt import GeminiPrompt
-from core.config.gemini_model_config import GeminiModelConfig
+from core.config.model_config import GeminiModelConfig
 from core.config.logging_config import setup_logger
 
 # Set up logging

@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 from fastapi.responses import StreamingResponse
 from core.orchestra import AgentOrchestra
-from core.config.model_predefine_config import predefine_model_configs
+from core.config.model_predefine_config import predefine_gemini_configs, predefine_qwen_configs
 
 
 # Create router instance
@@ -39,8 +39,8 @@ class MultiAgentRequest(BaseModel):
     
 
 
-@router.post("/multi-agent")
-async def multi_agent_response(request: MultiAgentRequest):
+@router.post("/multi-agent/gemini")
+async def multi_agent_response_gemini(request: MultiAgentRequest):
     """
     Get a response from the multi-agent system
     """
@@ -52,7 +52,27 @@ async def multi_agent_response(request: MultiAgentRequest):
         response = orchestra.multi_agent_response(
             chat_history=request.chat_history,
             current_question=request.current_question,
-            model_configs=predefine_model_configs
+            model_configs=predefine_gemini_configs
+        )
+        
+        return {"response": response}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error processing request: {str(e)}")
+    
+@router.post("/multi-agent/qwen")
+async def multi_agent_response_qwen(request: MultiAgentRequest):
+    """
+    Get a response from the multi-agent system with local models config
+    """
+    try:
+        # Create an instance of AgentOrchestra
+        orchestra = AgentOrchestra()
+        
+        # Call the multi_agent_response method
+        response = orchestra.multi_agent_response(
+            chat_history=request.chat_history,
+            current_question=request.current_question,
+            model_configs=predefine_qwen_configs
         )
         
         return {"response": response}
@@ -74,7 +94,7 @@ async def multi_agent_response_stream(request: MultiAgentRequest):
             for chunk in orchestra.multi_agent_response_with_stream(
                 chat_history=request.chat_history,
                 current_question=request.current_question,
-                model_configs=predefine_model_configs
+                model_configs=predefine_gemini_configs
             ):
                 yield f"data: {chunk}\n\n"
         

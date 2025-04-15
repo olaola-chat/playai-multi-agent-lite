@@ -1,5 +1,6 @@
 from core.prompt.agent_predefine_prompt import *
 from core.llmapi.gemini_api import generate_text, generate_text_with_stream
+from core.llmapi.local_llm_api import local_model_generate_text
 from core.prompt.gemini_prompt import GeminiPrompt
 import random
 from core.config.logging_config import setup_logger
@@ -41,6 +42,32 @@ class AgentOrchestra:
                 "agent_3": model_configs["agent_3"],
                 "agent_4": model_configs["agent_4"]}
     
+    def get_router_agent_response(self, current_question, router_agent_prompt, _model_configs):
+        if _model_configs.model.startswith("gemini"):
+            prompt = GeminiPrompt(prompt=current_question, system_instruction=router_agent_prompt)
+            return generate_text(prompt, _model_configs)
+        else:
+            return local_model_generate_text(
+                prompt=current_question,
+                system_instruction=router_agent_prompt,
+                model_configs=_model_configs
+        )
+
+    def router_to_agent(self, current_question, router_agent_response, agent_prompt, model_configs):
+        for agent_key in ["agent_1", "agent_2", "agent_3", "agent_4"]:
+            if agent_key in router_agent_response:
+                agent_model_config = model_configs[agent_key]
+                if agent_model_config.model.startswith("gemini"):
+                    prompt = GeminiPrompt(prompt=current_question, system_instruction=agent_prompt[agent_key])
+                    return generate_text(prompt, agent_model_config)
+                else:
+                    return local_model_generate_text(
+                        prompt=current_question,
+                        system_instruction=agent_prompt[agent_key],
+                        model_configs=agent_model_config
+                    )
+        logger.info("没有找到合适的代理")
+        return ""
 
     def multi_agent_response_with_stream(self, chat_history, current_question, model_configs:dict):
         router_agent_prompt = self.init_router_agent_prompt(chat_history, current_question)
@@ -49,7 +76,7 @@ class AgentOrchestra:
         agent_prompt = self.init_agent_prompt(chat_history, current_question, emotion_guide)
         _model_configs = self.init_agent_model_config(model_configs)
 
-        router_agent_response = generate_text(GeminiPrompt(prompt=current_question, system_instruction=router_agent_prompt), _model_configs["router_agent"])
+        router_agent_response = self.get_router_agent_response(current_question, router_agent_prompt, _model_configs["router_agent"])
         logger.info("router_agent_response:{router_agent_response}" )
 
         if "agent_1" in router_agent_response:
@@ -76,20 +103,7 @@ class AgentOrchestra:
         agent_prompt = self.init_agent_prompt(chat_history, current_question, emotion_guide)
         _model_configs = self.init_agent_model_config(model_configs)
 
-        router_agent_response = generate_text(GeminiPrompt(prompt=current_question, system_instruction=router_agent_prompt), _model_configs["router_agent"])
+        router_agent_response = self.get_router_agent_response(current_question, router_agent_prompt, _model_configs["router_agent"])
         logger.info("router_agent_response:{router_agent_response}" )
 
-        if "agent_1" in router_agent_response: 
-            return generate_text(GeminiPrompt(prompt=current_question, system_instruction=agent_prompt["agent_1"]), _model_configs["agent_1"])
-               
-        elif "agent_2" in router_agent_response:
-            return generate_text(GeminiPrompt(prompt=current_question, system_instruction=agent_prompt["agent_2"]), _model_configs["agent_2"])
-                
-        elif "agent_3" in router_agent_response:
-            return generate_text(GeminiPrompt(prompt=current_question, system_instruction=agent_prompt["agent_3"]), _model_configs["agent_3"])
-        
-        elif "agent_4" in router_agent_response:
-            return generate_text(GeminiPrompt(prompt=current_question, system_instruction=agent_prompt["agent_4"]), _model_configs["agent_4"])
-        else:
-            logger.info("没有找到合适的代理")
-            return ""
+        return self.router_to_agent(current_question, router_agent_response, agent_prompt, _model_configs)

@@ -1,6 +1,5 @@
 import requests
-import pytest
-import json
+
 
 # Base URL for our API
 BASE_URL = "http://0.0.0.0:18090/agents"

@@ -1,9 +1,8 @@
-from core.config.gemini_model_config import ModelName
 from core.prompt.gemini_prompt import ChatHistory
-from core.config.gemini_model_config import GeminiModelConfig
 from core.config.model_predefine_config import predefine_model_configs
 from google.genai.types import Content,Part
 from core.orchestra import AgentOrchestra
+
 
 def init_chat_history():
     return ChatHistory(
